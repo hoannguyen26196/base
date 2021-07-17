@@ -1,0 +1,118 @@
+{
+    "name": "blockchain-${ORG}",
+    "version": "1.0.0",
+    "client": {
+        "organization": "${ORG}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "${ORG}": {
+            "mspid": "${ORG}",
+            "peers": [
+                "peer0.${ORG}.com",
+                "peer1.${ORG}.com"
+            ],
+            "certificateAuthorities": [
+                "ca.${ORG}.com"
+            ]
+        }
+    },
+    "orderers":{
+        "orderer.com":{
+            "url": "grpcs://localhost:7050",
+            "grpcOptions":{
+                "ssl-target-name-override": "orderer.com",
+                "grpc-max-send-message-length": -1,
+                "grpc-keepalive-time-ms": 120000      
+            },
+            "tlsCACerts":{
+                "pem": "${ORDEPEM}"
+            }
+        },
+        "orderer1.com":{
+            "url": "grpcs://localhost:8050",
+            "grpcOptions":{
+                "ssl-target-name-override": "orderer1.com",
+                "grpc-max-send-message-length": -1,
+                "grpc-keepalive-time-ms": 120000  
+            },
+            "tlsCACerts":{
+                "pem":"${ORDE1PEM}"
+            }
+        },
+        "orderer2.com":{
+            "url": "grpcs://localhost:9050",
+            "grpcOptions":{
+                "ssl-target-name-override": "orderer2.com",
+                "grpc-max-send-message-length": -1,
+                "grpc-keepalive-time-ms": 120000  
+            },
+            "tlsCACerts":{
+                "pem": "${ORDE2PEM}"
+            }
+        },
+        "orderer3.com":{
+            "url": "grpcs://localhost:10050",
+            "grpcOptions":{
+                "ssl-target-name-override": "orderer3.com",
+                "grpc-max-send-message-length": -1,
+                "grpc-keepalive-time-ms": 120000
+            },
+            "tlsCACerts":{
+                "pem": "${ORDE3PEM}"
+            }
+        },
+        "orderer4.com":{
+            "url": "grpcs://localhost:11050",
+            "grpcOptions":{
+                "ssl-target-name-override": "orderer4.com",
+                "grpc-max-send-message-length": -1,
+                "grpc-keepalive-time-ms": 120000
+            },
+            "tlsCACerts":{
+                "pem": "${ORDE4PEM}"
+            }
+        }
+    },
+    "peers": {
+        "peer0.${ORG}.com": {
+            "url": "grpcs://localhost:${P0PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.${ORG}.com",
+                "hostnameOverride": "peer0.${ORG}.com"
+            }
+        },
+        "peer1.${ORG}.com": {
+            "url": "grpcs://localhost:${P1PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.${ORG}.com",
+                "hostnameOverride": "peer1.${ORG}.com"
+            }
+        }
+
+    },
+    "certificateAuthorities": {
+        "ca.${ORG}.com": {
+            "url": "https://localhost:${CAPORT}",
+            "caName": "ca-${ORG}",
+            "tlsCACerts": {
+                "pem": ["${CAPEM}"]
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

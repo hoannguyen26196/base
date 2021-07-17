@@ -1,0 +1,194 @@
+Organizations:
+  - &OrdererOrg
+    Name: ordererOrg
+    ID: ordererMSP
+    MSPDir: ../organizations/ordererOrganizations/orderer.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('ordererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('ordererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('ordererMSP.admin')"
+    OrdererEndpoints:
+        - orderer.com:7050
+        - orderer1.com:7050
+        - orderer2.com:7050
+        - orderer3.com:7050
+
+  - &Issuer
+    Name: issuer
+    ID: issuer
+    MSPDir: ../organizations/peerOrganizations/issuer.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('issuer.admin','issuer.peer','issuer.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('issuer.admin','issuer.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('issuer.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('issuer.peer')"
+
+    AnchorPeers:
+      - Host: peer0.issuer.com
+        Port: 7051
+
+  - &Holder
+    Name: holder
+    ID: holder
+    MSPDir: ../organizations/peerOrganizations/holder.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('holder.admin','holder.peer','holder.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('holder.admin','holder.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('holder.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('holder.peer')"
+    AnchorPeers:
+      - Host: peer0.holder.com
+        Port: 7051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+
+  Orderer: &OrdererCapabilities
+    V2_0: true
+
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Etcdraft:
+    Consenters:
+    - Host: orderer.com
+      Port: 7050
+      ClientTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer.com/tls/server.crt
+      ServerTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer.com/tls/server.crt
+    - Host: orderer1.com
+      Port: 7050
+      ClientTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer1.com/tls/server.crt
+      ServerTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer1.com/tls/server.crt
+    - Host: orderer2.com
+      Port: 7050
+      ClientTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer2.com/tls/server.crt
+      ServerTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer2.com/tls/server.crt
+    - Host: orderer3.com
+      Port: 7050
+      ClientTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer3.com/tls/server.crt
+      ServerTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer3.com/tls/server.crt
+    - Host: orderer4.com
+      Port: 7050
+      ClientTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer4.com/tls/server.crt
+      ServerTLSCert: ../organizations/ordererOrganizations/orderer.com/orderers/orderer4.com/tls/server.crt
+  Addresses:
+    - orderer.com:7050
+    - orderer1.com:7050
+    - orderer2.com:7050
+    - orderer3.com:7050
+    - orderer4.com:7050
+
+  BatchTimeout: 0.75s
+
+  BatchSize:
+      MaxMessageCount: 200
+      AbsoluteMaxBytes: 10MB
+      PreferredMaxBytes: 512KB
+
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  Genesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities:
+        <<: *OrdererCapabilities
+    Consortiums:
+      Blockchain:
+        Organizations:
+          - *Issuer
+          - *Holder
+
+  Channel:
+    Consortium: Blockchain
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Issuer
+        - *Holder
+      Capabilities:
+        <<: *ApplicationCapabilities

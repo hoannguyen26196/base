@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+
+volumes:
+  pgdata:
+  walletstore:
+
+networks:
+  blockchain:
+    external:
+      name: blockchain
+
+services:
+
+  explorerdb.blockchain.com:
+    image: hyperledger/explorer-db:latest
+    container_name: explorerdb.blockchain.com
+    hostname: explorerdb.blockchain.com
+    environment:
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - blockchain
+
+  explorer.blockchain.com:
+    image: hyperledger/explorer:latest
+    container_name: explorer.blockchain.com
+    hostname: explorer.blockchain.com
+    environment:
+      - DATABASE_HOST=explorerdb.blockchain.com
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWD=password
+      - LOG_LEVEL_APP=debug
+      - LOG_LEVEL_DB=debug
+      - LOG_LEVEL_CONSOLE=info
+      - LOG_CONSOLE_STDOUT=true
+      - DISCOVERY_AS_LOCALHOST=false
+    volumes:
+      - ../explore/config.json:/opt/explorer/app/platform/fabric/config.json
+      - ../explore/network.json:/opt/explorer/app/platform/fabric/network.json
+      - ../organizations:/tmp/crypto
+      - walletstore:/opt/explorer/wallet
+    ports:
+      - 9090:8080
+    depends_on:
+      - explorerdb.blockchain.com
+    networks:
+      - blockchain
