@@ -1,0 +1,31 @@
+version: '2'
+networks:
+    blockchain:
+        external: true
+services:
+
+    mongodb:
+        image: mongo
+        container_name: mongo-dev
+        restart: always
+        environment:
+            MONGO_INITDB_DATABASE: auth
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: password
+        ports:
+            - 27017:27017
+        networks:
+            - blockchain
+    mongo-express:
+        image: mongo-express
+        restart: always
+        environment:
+            ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+            ME_CONFIG_MONGODB_ADMINPASSWORD: password
+            ME_CONFIG_MONGODB_SERVER: mongo-dev
+        ports:
+            - 10081:8081
+        depends_on:
+            - mongodb
+        networks:
+            - blockchain
